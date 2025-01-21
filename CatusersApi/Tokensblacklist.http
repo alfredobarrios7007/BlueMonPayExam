@@ -1,0 +1,54 @@
+# Get all rows
+GET http://localhost:35540/api/tokens-black-list
+Content-Type: application/json
+
+###
+
+# Get a user by ID
+GET http://localhost:35540/api/tokens-black-list/{id}
+Content-Type: application/json
+
+###
+
+# Create a new user
+POST http://localhost:35540/api/tokens-black-list
+Content-Type: application/json
+
+{
+	"name": "John", 
+	"lastname": "Doe",
+	"username": "johndoe", 
+	"password": "securepassword", 
+	"email": "johndoe@example.com", 
+	"phone": "1234567890", 
+	"two_step_ver": "Y", 
+	"gender": "M", 
+	"birthdate": "1990 -01-01T00:00:00Z", 
+	"status": "A"
+}
+
+###
+
+# Update an existing user
+PUT http://localhost:35540/api/tokens-black-list/{id}
+Content-Type: application/json
+
+{
+	"id": "{{id}}", 
+	"name": "John", 
+	"lastname": "Doe",
+	"username": "johndoe", 
+	"password": "securepassword", 
+	"email": "johndoe@example.com", 
+	"phone": "1234567890", 
+	"two_step_ver": "Y", 
+	"gender": "M", 
+	"birthdate": "1990 -01-01T00:00:00Z", 
+	"status": "A"
+}
+
+###
+
+# Delete a user
+DELETE http://localhost:35540/api/tokens-black-list/{id}
+Content-Type: application/json
