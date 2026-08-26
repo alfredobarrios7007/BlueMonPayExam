@@ -17,8 +17,8 @@ PasswordRecoveryService         validates credentials, orchestrates the
 MntCustomDataClient   MntCustomDataAuditLogger
 (MicroProfile REST     (Log4j2 logger "mntCustomDataAudit",
  Client, JSON POST      independent from Quarkus/JBoss logging,
- to the mntCustomData   writes to mntCustomData.log)
- service)
+ to the mntCustomData   writes to a daily-rotated
+ service)               mntCustomData yyyy-MM-dd.log file)
 ```
 
 - **`PasswordRecoveryResource`** (`src/main/java/mx/com/invex/passwordrecovery`) — JAX-RS
@@ -42,8 +42,12 @@ MntCustomDataClient   MntCustomDataAuditLogger
   `src/main/resources/log4j2.xml` with the pattern `date time|B2|cui`. This is a
   plain Apache Log4j2 pipeline, separate from Quarkus's own JBoss-LogManager-based
   console/application logging, so the audit file only ever contains these
-  entries. The log directory is controlled by the `MNT_CUSTOM_DATA_LOG_DIR`
-  environment variable (defaults to `logs`, relative to the working directory).
+  entries. The appender uses a `DirectWriteRolloverStrategy`, so it writes
+  straight to a file named after the current date — `mntCustomData yyyy-MM-dd.log`
+  — and automatically starts a new file at midnight, keeping the last 30 daily
+  files (older ones are deleted). The log directory is controlled by the
+  `MNT_CUSTOM_DATA_LOG_DIR` environment variable (defaults to `logs`, relative
+  to the working directory).
 
 ### Request / response contract
 
@@ -104,7 +108,7 @@ On success, the service also:
      }
    }
    ```
-2. Appends a line to `mntCustomData.log`:
+2. Appends a line to that day's audit file, e.g. `mntCustomData 2026-08-25.log`:
    ```
    2026-08-25 12:34:56.789|B2|abc7007
    ```
@@ -135,8 +139,9 @@ By default:
 - The service listens on `http://localhost:8080`.
 - `mntCustomData` calls target `http://localhost:4501` (override with the
   `MNT_CUSTOM_DATA_URL` env var, e.g. `MNT_CUSTOM_DATA_URL=http://localhost:9000`).
-- The audit log is written to `./logs/mntCustomData.log`, relative to wherever
-  the JVM is started from (override the directory with `MNT_CUSTOM_DATA_LOG_DIR`).
+- The audit log is written to `./logs/mntCustomData yyyy-MM-dd.log` (a new file
+  each day), relative to wherever the JVM is started from (override the
+  directory with `MNT_CUSTOM_DATA_LOG_DIR`).
 
 Try it:
 
@@ -170,8 +175,8 @@ This will:
 - **Persist the audit log to a local directory on the host: `./logs`**
   (mounted to `/deployments/logs` inside the container, via the `volumes:`
   entry in `docker-compose.yml`). After a successful call you'll find the
-  audit trail at `./logs/mntCustomData.log` on the host, surviving container
-  restarts/recreation.
+  audit trail at `./logs/mntCustomData yyyy-MM-dd.log` on the host (a new file
+  per day, last 30 kept), surviving container restarts/recreation.
 
 Stop it with:
 
